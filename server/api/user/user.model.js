@@ -8,6 +8,7 @@ var authTypes = ['github', 'twitter', 'facebook', 'google'];
 var UserSchema = new Schema({
   name: String,
   email: { type: String, lowercase: true },
+  confirmedEmail : { type : Boolean, default: false},
   role: {
     type: String,
     default: 'user'
@@ -141,6 +142,11 @@ UserSchema.methods = {
     if (!password || !this.salt) return '';
     var salt = new Buffer(this.salt, 'base64');
     return crypto.pbkdf2Sync(password, salt, 10000, 64).toString('base64');
+  },
+
+  confirmMail : function(cb) {
+    this.confirmedEmail = true;
+    this.save(cb)
   }
 };
 

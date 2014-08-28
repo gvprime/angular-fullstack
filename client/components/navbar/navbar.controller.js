@@ -11,6 +11,7 @@ angular.module('angularFullstackApp')
     $scope.isLoggedIn = Auth.isLoggedIn;
     $scope.isAdmin = Auth.isAdmin;
     $scope.getCurrentUser = Auth.getCurrentUser;
+    $scope.isMailconfirmed = Auth.isMailconfirmed;
 
     $scope.logout = function() {
       Auth.logout();

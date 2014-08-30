@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('angularFullstackApp', [
-  'ngCookies',
+  'ngStorage',
   'ngResource',
   'ngSanitize',
   'btford.socket-io',
@@ -16,13 +16,13 @@ angular.module('angularFullstackApp', [
     $httpProvider.interceptors.push('authInterceptor');
   })
 
-  .factory('authInterceptor', function ($rootScope, $q, $cookieStore, $location) {
+  .factory('authInterceptor', function ($rootScope, $q, $localStorage, $location) {
     return {
       // Add authorization token to headers
       request: function (config) {
         config.headers = config.headers || {};
-        if ($cookieStore.get('token')) {
-          config.headers.Authorization = 'Bearer ' + $cookieStore.get('token');
+        if ($localStorage.token) {
+          config.headers.Authorization = 'Bearer ' + $localStorage.token;
         }
         return config;
       },
@@ -32,7 +32,7 @@ angular.module('angularFullstackApp', [
         if(response.status === 401) {
           $location.path('/login');
           // remove any stale tokens
-          $cookieStore.remove('token');
+          delete $localStorage.token;
           return $q.reject(response);
         }
         else {

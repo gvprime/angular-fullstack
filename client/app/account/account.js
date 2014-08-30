@@ -8,6 +8,11 @@ angular.module('angularFullstackApp')
         templateUrl: 'app/account/login/login.html',
         controller: 'LoginCtrl'
       })
+      .state('loginWithToken', {
+        url: '/login/:sessionToken',
+        templateUrl: 'app/account/login/login.html',
+        controller: 'LoginCtrl'
+      })
       .state('signup', {
         url: '/signup',
         templateUrl: 'app/account/signup/signup.html',

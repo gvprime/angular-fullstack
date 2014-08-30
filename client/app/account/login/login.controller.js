@@ -1,9 +1,14 @@
 'use strict';
 
 angular.module('angularFullstackApp')
-  .controller('LoginCtrl', function ($scope, Auth, $location, $window) {
+  .controller('LoginCtrl', function ($scope, Auth, $location, $window, $stateParams) {
     $scope.user = {};
     $scope.errors = {};
+
+    if ($stateParams.sessionToken) {
+      Auth.setSessionToken($stateParams.sessionToken, function(){$location.path('/');});
+    }
+
 
     $scope.login = function(form) {
       $scope.submitted = true;

@@ -1,9 +1,9 @@
 'use strict';
 
 angular.module('angularFullstackApp')
-  .factory('Auth', function Auth($location, $rootScope, $http, User, Local, $cookieStore, $q) {
+  .factory('Auth', function Auth($location, $rootScope, $http, User, Local, $localStorage, $q) {
     var currentUser = {};
-    if($cookieStore.get('token')) {
+    if($localStorage.token) {
       currentUser = User.get();
     }
 
@@ -25,7 +25,7 @@ angular.module('angularFullstackApp')
           password: user.password
         }).
         success(function(data) {
-          $cookieStore.put('token', data.token);
+          $localStorage.token = data.token;
           currentUser = User.get();
           deferred.resolve(data);
           return cb();
@@ -45,7 +45,7 @@ angular.module('angularFullstackApp')
        * @param  {Function}
        */
       logout: function() {
-        $cookieStore.remove('token');
+        delete $localStorage.token;
         currentUser = {};
       },
 
@@ -61,7 +61,7 @@ angular.module('angularFullstackApp')
 
         return User.save(user,
           function(data) {
-            $cookieStore.put('token', data.token);
+            $localStorage.token = data.token;
             currentUser = User.get();
             return cb(user);
           },
@@ -98,6 +98,7 @@ angular.module('angularFullstackApp')
        * @return {Object} user
        */
       getCurrentUser: function() {
+        if (!currentUser&&$localStorage.token) return currentUser = User.get();
         return currentUser;
       },
 
@@ -140,7 +141,7 @@ angular.module('angularFullstackApp')
        * Get auth token
        */
       getToken: function() {
-        return $cookieStore.get('token');
+        return $localStorage.token;
       },
 
       /**
@@ -157,7 +158,7 @@ angular.module('angularFullstackApp')
         return Local.confirmMail({
           mailConfirmationToken: mailConfirmationToken
         }, function(data) {
-          $cookieStore.put('token', data.token);
+          $localStorage.token = data.token;
           currentUser = User.get();
           return cb(currentUser);
         }, function(err) {
@@ -171,8 +172,6 @@ angular.module('angularFullstackApp')
        * @return {Boolean}
        */
       isMailconfirmed: function() {
-        console.log('Current user: ');
-        console.log(currentUser);
         return currentUser.confirmedEmail;
       },
 
@@ -227,12 +226,24 @@ angular.module('angularFullstackApp')
         return Local.confirmPassword({
           passwordResetToken: passwordResetToken,
         }, function(data) {
-          $cookieStore.put('token', data.token);
+          $localStorage.token = data.token;
           currentUser = User.get();
           return cb(data);
         }, function(err) {
           return cb(err);
         }).$promise;
+      },
+
+      /**
+       * Set session token
+       *
+       * @param  {String}   session token
+       * @return {Promise}
+       */
+      setSessionToken: function(sessionToken, callback) {
+        var cb = callback || angular.noop;
+        $localStorage.token = sessionToken;
+        currentUser = User.get(cb);
       }
     };
   });

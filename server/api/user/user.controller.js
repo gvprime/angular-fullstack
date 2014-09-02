@@ -24,18 +24,55 @@ exports.index = function(req, res) {
 /**
  * Creates a new user
  */
-exports.create = function (req, res, next) {
-  var newUser = new User(req.body);
-  newUser.provider = 'local';
-  newUser.role = 'user';
-  newUser.save(function(err, user) {
-    if (err) return validationError(res, err);
+exports.createGuest = function (req, res, next) {
 
-    var mailConfirmationToken =  jwt.sign({user : user._id, email : user.email}, config.secrets.mailConfirmation, {expiresInMinutes: 60 * 24}) 
-    mail.mailConfirmation.sendMail(user, mailConfirmationToken, null);
+  var email = req.body.email;
+  var name = req.body.name;
+  var password = req.body.password;
 
-    var token = jwt.sign({_id: user._id }, config.secrets.session, { expiresInMinutes: 60*5 });
-    res.json({ token: token });
+  User.findOne({email: email}, function(err, user){
+
+    if (user) res.send(401);
+
+      var guestSessionToken = jwt.sign({email: email, name : name, role : 'guest' , password: password }, config.secrets.session, { expiresInMinutes: 60*5 });
+      res.json({ token: guestSessionToken });
+
+      var mailConfirmationToken = jwt.sign({name : req.body.name, email: req.body.email,  password: req.body.password }, config.secrets.mailConfirmation, {expiresInMinutes: 60 * 24 * 30});
+
+      mail.userConfirmation.sendMail(req.body.name, req.body.email, mailConfirmationToken, null);
+  });
+};
+
+  /**
+ * Confirm mail address
+ */
+ exports.createUser = function(req, res, next) {
+
+
+  var mailConfirmationToken = req.param('mailConfirmationToken');
+
+  jwt.verify(mailConfirmationToken, config.secrets.mailConfirmation, function(error, data) {
+
+    if (error) return res.send(403);
+
+    if (data.exp < Date.now()) return res.send(403);
+
+    User.findOne({email: data.email}, function(error, user){
+      if (error) return res.send(403);
+      if (user) return res.send(403);
+
+      var newUser = new User(data);
+      newUser.provider = 'local';
+      newUser.role = 'user';
+      newUser.confirmedEmail = true;
+
+      newUser.save(function(err, user) {
+        if (err) return validationError(res, err);
+        var token = jwt.sign({_id: user._id }, config.secrets.session, { expiresInMinutes: 60*5 });
+        res.json({ token: token });
+      });
+
+    });
   });
 };
 
@@ -88,6 +125,11 @@ exports.changePassword = function(req, res, next) {
  * Get my info
  */
 exports.me = function(req, res, next) {
+  if (req.user.role==='guest') {
+    var user = req.user;
+    delete user.password;
+    return res.json(user)
+  };
   var userId = req.user._id;
   User.findOne({
     _id: userId

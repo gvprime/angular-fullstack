@@ -9,7 +9,7 @@ angular.module('angularFullstackApp')
       $scope.submitted = true;
 
       if(form.$valid) {
-        Auth.createUser({
+        Auth.createGuest({
           name: $scope.user.name,
           email: $scope.user.email,
           password: $scope.user.password

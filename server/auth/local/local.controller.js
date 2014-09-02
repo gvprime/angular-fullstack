@@ -27,46 +27,16 @@ exports.root = function(req, res, next) {
  * Send confirmation mail
  */
  exports.sendMailAdressConfirmationMail = function(req, res, next) {
-  var userId = req.user._id;
-  User.findOne({
-    _id: userId
-  }, '-salt -hashedPassword', function(error, user) { // don't ever give out the password or salt
-  if (error) return next(error);
-  if (!user) return res.json(401);
-  var mailConfirmationToken =  jwt.sign({user : user._id, email : user.email}, config.secrets.mailConfirmation, {expiresInMinutes: 1}) 
-  mail.mailConfirmation.sendMail(user, mailConfirmationToken, function(){res.send(200);});
-});
-};
+  
+  var user = req.user;
+  if (user.role !== 'guest') return res.send(403);
 
-  /**
- * Confirm mail address
- */
- exports.confirmMailAddress = function(req, res, next) {
+  var mailConfirmationToken = jwt.sign({name : user.name, email: user.email,  password: user.password }, config.secrets.mailConfirmation, {expiresInMinutes: 60 * 24 * 30});
 
-  console.log('Confirm email address');
-
-  var mailConfirmationToken = req.param('mailConfirmationToken');
-
-  jwt.verify(mailConfirmationToken, config.secrets.mailConfirmation, function(error, data) {
-
-
-    if (error) return res.send(403);
-
-    if (data.exp < Date.now()) return res.send(403, { message: "The validation token has expired. You should signin and ask for a new one."});
-
-    User.findById(data.user, function(error, user){
-     if(error) return res.send(403, { message: "The validation token is invalid. You should signin and ask for a new one."});
-     if (!user) return res.send(403, { message: "The validation token is invalid. You should signin and ask for a new one."});
-
-     user.confirmMail(function(){
-      res.json({ token: auth.signToken(user._id) });
-     });
-   });
-
+  mail.userConfirmation.sendMail(user.name, user.email, mailConfirmationToken, function(){
+    res.send(200);
   });
 };
-
-
 
   /**
  * Send password resset mail

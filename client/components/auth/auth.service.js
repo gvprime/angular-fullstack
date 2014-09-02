@@ -50,16 +50,16 @@ angular.module('angularFullstackApp')
       },
 
       /**
-       * Create a new user
+       * Create a new guest user
        *
        * @param  {Object}   user     - user info
        * @param  {Function} callback - optional
        * @return {Promise}
        */
-      createUser: function(user, callback) {
+      createGuest: function(user, callback) {
         var cb = callback || angular.noop;
 
-        return User.save(user,
+        return User.createGuest(user,
           function(data) {
             $localStorage.token = data.token;
             currentUser = User.get();
@@ -69,6 +69,28 @@ angular.module('angularFullstackApp')
             this.logout();
             return cb(err);
           }.bind(this)).$promise;
+      },
+
+       /**
+       * Confirm user
+       *
+       * @param  {String}   mailConfirmationToken
+       * @param  {Function} callback    - optional
+       * @return {Promise}
+       */
+      createUser: function(mailConfirmationToken, callback) {
+
+        var cb = callback || angular.noop;
+        
+        return User.createUser({
+          mailConfirmationToken: mailConfirmationToken
+        }, function(data) {
+          $localStorage.token = data.token;
+          currentUser = User.get();
+          return cb(currentUser);
+        }, function(err) {
+          return cb(err);
+        }).$promise;
       },
 
       /**
@@ -144,27 +166,7 @@ angular.module('angularFullstackApp')
         return $localStorage.token;
       },
 
-      /**
-       * Confirm mail
-       *
-       * @param  {String}   mailConfirmationToken
-       * @param  {Function} callback    - optional
-       * @return {Promise}
-       */
-      confirmMail: function(mailConfirmationToken, callback) {
 
-        var cb = callback || angular.noop;
-        
-        return Local.confirmMail({
-          mailConfirmationToken: mailConfirmationToken
-        }, function(data) {
-          $localStorage.token = data.token;
-          currentUser = User.get();
-          return cb(currentUser);
-        }, function(err) {
-          return cb(err);
-        }).$promise;
-      },
 
       /**
        * Check if a user's mail is confirmed
@@ -184,8 +186,8 @@ angular.module('angularFullstackApp')
       sendConfirmationMail: function(callback) {
         var cb = callback || angular.noop;
 
-        return Local.verifyMail(function(user) {
-          return cb(user);
+        return Local.verifyMail(function() {
+          return cb();
         }, function(err) {
           return cb(err);
         }).$promise;

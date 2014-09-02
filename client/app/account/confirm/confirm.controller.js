@@ -10,7 +10,7 @@ angular.module('angularFullstackApp')
 
   
     if ($scope.confirmToken) {
-      Auth.confirmMail($scope.confirmToken)
+      Auth.createUser($scope.confirmToken)
         .then( function() {
           // Logged in, redirect to home
           $location.path('/');
@@ -23,12 +23,7 @@ angular.module('angularFullstackApp')
 
     $scope.sendConfirmationMail = function() {
 
-      if(Auth.isLoggedIn()) {
-        confirmationMailSend = true;
-        Auth.sendConfirmationMail(function(){
-          confirmationMailSend = false;
-        });
-      }
+      Auth.sendConfirmationMail();
     };
 
     $scope.confirmationMailSend = function() {

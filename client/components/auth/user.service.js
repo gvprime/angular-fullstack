@@ -17,6 +17,12 @@ angular.module('angularFullstackApp')
         params: {
           id:'me'
         }
+      },
+      createGuest: {
+        method: 'POST',
+      },
+      createUser: {
+        method: 'PUT',
       }
 	  });
   });

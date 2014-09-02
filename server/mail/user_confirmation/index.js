@@ -2,8 +2,12 @@
 
 var service = require('./../mail.service.js');
 
-var sendMail = function(user, mailConfirmationToken, callback){
+var sendMail = function(name, email, mailConfirmationToken, callback){
 
+    var user = {
+    	name : name,
+    	email : email,
+    };
     console.log(user);
 
     var locals = {
@@ -13,7 +17,7 @@ var sendMail = function(user, mailConfirmationToken, callback){
       MAIL_CONFIRMATION_TOKEN : mailConfirmationToken 
     };
 
-    service.sendmail('mail_confirmation', user, 'Activation', locals, callback);
+    service.sendmail('user_confirmation', user, 'Activation', locals, callback);
 
   };
 

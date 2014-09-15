@@ -1,0 +1,34 @@
+div.navbar.navbar-default.navbar-static-top
+  div.container
+    div.navbar-header
+      button.navbar-toggle(type='button', ng-click='Navbar.isCollapsed = !Navbar.isCollapsed')
+        span.sr-only Toggle navigation
+        span.icon-bar
+        span.icon-bar
+        span.icon-bar
+      a.navbar-brand(href='/') test-fullstack
+
+    div#navbar-main.navbar-collapse.collapse(collapse='Navbar.isCollapsed')
+      ul.nav.navbar-nav
+        li(ng-repeat='item in Navbar.menu', ui-sref-active='active')
+          a(ui-sref='{{item.state}}') {{item.title}}
+
+        li(ng-show='Auth.isAdmin()', ui-sref-active='active')
+          a(ui-sref='admin') Admin
+
+      ul.nav.navbar-nav.navbar-right
+        li(ng-hide='Auth.isLoggedIn()', ui-sref-active='active')
+          a(ui-sref='signup') Sign up
+
+        li(ng-hide='Auth.isLoggedIn()', ui-sref-active='active')
+          a(ui-sref='login') Login
+
+        li(ng-show='Auth.isLoggedIn()')
+          p.navbar-text Hello {{ Auth.getCurrentUser().name }}
+
+        li(ng-show='Auth.isLoggedIn()', ui-sref-active='active')
+          a(ui-sref='settings')
+            span.glyphicon.glyphicon-cog
+
+        li(ng-show='Auth.isLoggedIn()')
+          a(ui-sref='logout') Logout

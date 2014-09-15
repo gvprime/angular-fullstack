@@ -17,6 +17,15 @@ angular.module('angularFullstackApp')
           }
         }
       })
+      .state('logout', {
+        url: '/logout?referrer',
+        referrer: 'main',
+        controller: function($state, Auth) {
+          var referrer = $state.params.referrer || $state.current.referrer;
+          Auth.logout();
+          $state.go(referrer);
+        }
+      })
       .state('signup', {
         url: '/signup',
         templateUrl: 'app/account/signup/signup.html',

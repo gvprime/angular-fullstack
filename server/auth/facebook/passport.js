@@ -19,6 +19,7 @@ exports.setup = function (User, config) {
           user = new User({
             name: profile.displayName,
             email: profile.emails[0].value,
+            picture : 'http://graph.facebook.com/' +profile.username + '/picture',
             role: 'user',
             username: profile.username,
             provider: 'facebook',
